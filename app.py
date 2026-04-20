@@ -69,9 +69,28 @@ with tab2:
 
         st.plotly_chart(fig2, use_container_width=True)
 
+        # Get latest date in dataset
+        last_date = df["date"].max()
+
+        # Next day date
+        next_day = last_date + pd.Timedelta(days=1)
+
+        # Prediction value
         latest_pred = df["prediction"].iloc[-1]
 
-        st.metric("Next Day Prediction", f"{latest_pred:.2f}")
+        # Display with date
+        next_day_str = next_day.strftime("%d %b %Y")
+
+        st.metric(
+            f"Forecast Tomorrow ({next_day_str})",
+            f"{latest_pred:.2f}"
+        )
+        if latest_pred > 100:
+            st.error("⚠️ High pollution expected!")
+        elif latest_pred > 50:
+            st.warning("⚠️ Moderate pollution")
+        else:
+            st.success("✅ Air quality is good")
 
     else:
         st.warning("Prediction data not available")
@@ -79,17 +98,13 @@ with tab2:
 # =========================
 # ⚠️ ANOMALIES
 # =========================
-# =========================
-# ⚠️ ANOMALIES
-# =========================
 with tab3:
     st.subheader("Detected Anomalies")
 
     if "anomaly" in df.columns:
-        # IMPORTANT: create a copy to avoid warning
         df_plot = df.copy()
 
-        # Convert to label (THIS IS THE FIX)
+        
         df_plot["anomaly_label"] = df_plot["anomaly"].map({
             0: "Normal",
             1: "Anomaly"
